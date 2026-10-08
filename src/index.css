@@ -1,89 +1,63 @@
 @import "tailwindcss";
 
+/*
+  ArcScore brand system.
+  Neutral bodies, one signal. Paper and ink do the work; Signal orange is
+  reserved for the arc, the ball, and the single number that matters.
+*/
 @theme {
-  --color-ink: #06070b;
-  --color-ink-2: #0b0d13;
-  --color-ink-3: #12151e;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-mute: #8a90a2;
-  --color-chalk: #eef0f5;
-  --color-lime: #c6ff3d;
-  --color-cyan: #5ad1ff;
-  --color-ember: #ff7a3d;
-  --color-violet: #9b7bff;
+  --color-paper: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-sunken: #efeee9;
+  --color-line: #e5e3dc;
+  --color-line-strong: #d4d1c8;
+  --color-ink: #111110;
+  --color-ink-2: #4a4944;
+  --color-ink-3: #85837c;
+  --color-ink-4: #b3b0a7;
+  --color-signal: #ff5a1f;
+  --color-signal-soft: #fff0e9;
 
-  --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Status: reserved, always paired with an icon + label. */
+  --color-good: #1f7a4d;
+  --color-good-soft: #e8f3ec;
+  --color-warn: #a86a00;
+  --color-warn-soft: #fbf1dc;
+  --color-bad: #c03a2b;
+  --color-bad-soft: #fbeae7;
 
-  --animate-marquee: marquee var(--duration, 40s) linear infinite;
-  --animate-shimmer: shimmer 2.6s linear infinite;
-  --animate-pulse-ring: pulse-ring 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
 
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(calc(-100% - var(--gap, 3rem))); }
-  }
-  @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
-  }
-  @keyframes pulse-ring {
-    0% { transform: scale(0.6); opacity: 0.9; }
-    100% { transform: scale(2.2); opacity: 0; }
-  }
+  --radius-card: 14px;
+  --shadow-card: 0 1px 0 rgb(17 17 16 / 0.03), 0 1px 2px rgb(17 17 16 / 0.04);
+  --shadow-float: 0 1px 2px rgb(17 17 16 / 0.06), 0 12px 32px -8px rgb(17 17 16 / 0.18);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-html { background: var(--color-ink); color-scheme: dark; scroll-behavior: smooth; }
+html { background: var(--color-paper); color: var(--color-ink); }
 body {
-  background: var(--color-ink);
-  color: var(--color-chalk);
+  background: var(--color-paper);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
 }
-::selection { background: var(--color-lime); color: var(--color-ink); }
+::selection { background: var(--color-ink); color: var(--color-paper); }
 
-.display {
-  font-family: var(--font-display);
-  font-variation-settings: "wdth" 112;
-  letter-spacing: -0.035em;
-  line-height: 0.92;
+.num { font-variant-numeric: tabular-nums; }
+.display { letter-spacing: -0.045em; line-height: 0.95; font-weight: 500; }
+.title { letter-spacing: -0.025em; font-weight: 500; }
+.label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-ink-3); }
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
-.display-condensed {
-  font-family: var(--font-display);
-  font-variation-settings: "wdth" 70;
-  letter-spacing: -0.01em;
-}
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-mute);
-}
-.text-gradient {
-  background: linear-gradient(100deg, #fff 0%, #c6ff3d 45%, #5ad1ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.grain::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 60;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.hairline-grid {
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
-  background-size: 64px 64px;
-}
+.focus-ring:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
 }
