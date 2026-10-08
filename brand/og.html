@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=block" rel="stylesheet">
+<style>
+  html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#070b18;font-family:Geist,system-ui,sans-serif;color:#fff}
+  .glow1{position:absolute;width:520px;height:520px;border-radius:50%;background:rgba(59,91,255,.32);filter:blur(120px);right:-80px;top:-160px}
+  .glow2{position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(255,90,31,.22);filter:blur(120px);right:180px;bottom:-220px}
+  svg.scene{position:absolute;inset:0}
+  .copy{position:absolute;left:72px;top:150px;width:640px}
+  .logo{position:absolute;left:72px;top:64px;display:flex;align-items:center;gap:12px;font-weight:600;font-size:30px;letter-spacing:-.03em}
+  h1{margin:0;font-weight:500;font-size:84px;line-height:.98;letter-spacing:-.045em}
+  .arc{background:linear-gradient(95deg,#7d92ff 0%,#ff8a5c 55%,#ff5a1f 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  p{margin:28px 0 0;font-size:26px;line-height:1.4;color:rgba(255,255,255,.62);letter-spacing:-.01em}
+  .card{position:absolute;right:72px;bottom:72px;width:250px;padding:22px 24px;border-radius:22px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)}
+  .num{font-size:64px;font-weight:500;letter-spacing:-.05em;line-height:1}
+  .row{display:flex;justify-content:space-between;align-items:flex-end}
+  .lab{font-size:16px;color:rgba(255,255,255,.55);margin-top:6px}
+  .up{font-size:28px;font-weight:500;color:#8ea0ff}
+</style></head>
+<body>
+<div class="glow1"></div><div class="glow2"></div>
+<svg class="scene" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1"><stop stop-color="#3b5bff"/><stop offset=".75" stop-color="#ff8a5c"/><stop offset="1" stop-color="#ff5a1f"/></linearGradient>
+    <radialGradient id="b" cx=".35" cy=".35" r=".7"><stop stop-color="#ffc2a3"/><stop offset=".45" stop-color="#ff6a2b"/><stop offset="1" stop-color="#8f2a06"/></radialGradient>
+  </defs>
+  <g stroke="#1a2547" stroke-width="1.2">
+    <line x1="0" x2="1200" y1="520" y2="520"/><line x1="0" x2="1200" y1="560" y2="560"/><line x1="0" x2="1200" y1="610" y2="610"/>
+    <line x1="700" y1="500" x2="560" y2="630"/><line x1="820" y1="500" x2="780" y2="630"/><line x1="940" y1="500" x2="1000" y2="630"/><line x1="1060" y1="500" x2="1220" y2="630"/>
+  </g>
+  <path d="M640 520 C 720 120, 1020 60, 1120 300" fill="none" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="1121" cy="300" r="30" fill="url(#b)"/>
+</svg>
+<div class="logo">
+  <svg width="44" height="28" viewBox="0 0 32 20"><path d="M3 17a12 12 0 0 1 24 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="17" r="3" fill="#ff5a1f"/></svg>
+  arcscore
+</div>
+<div class="copy">
+  <h1>What every athlete <span class="arc">is worth.</span></h1>
+  <p>The NIL valuation engine for brands, schools and athletes.</p>
+</div>
+<div class="card">
+  <div class="row"><div><div class="num">87</div><div class="lab">ArcScore</div></div><div style="text-align:right"><div class="up">↑ 12</div><div class="lab">12-month arc</div></div></div>
+</div>
+</body></html>

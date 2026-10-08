@@ -27,6 +27,11 @@ Vite, React 19, TypeScript, Tailwind CSS v4, Framer Motion and React Router, ser
 - The 3D scene (three.js, about 290KB gzipped) loads after first paint, behind an SVG poster that paints instantly, and fades in when its first frame is ready. It is skipped for data-saver, 2G/3G and reduced-motion visitors. Phones get a lighter scene (no reflections or bloom), and resolution steps down automatically if frame rate drops.
 - Hashed assets are served straight from Cloudflare's edge with a one-year immutable cache. Only HTML goes through the Worker.
 
+## Icons and link previews
+- `public/favicon.svg` is the master icon. `public/og.png` (1200×630) is the image shown when the link is shared in iMessage, Slack, WhatsApp, LinkedIn or X.
+- Edit `public/favicon.svg` or `brand/og.html`, then regenerate the PNG/ICO files with `node brand/render.mjs` (needs Playwright).
+- The Worker rewrites `og:image`, `twitter:image` and `og:url` to absolute URLs for whichever host serves the page, so previews work on `workers.dev` and on `arcscore.ai`.
+
 ## Develop
 ```bash
 npm install
