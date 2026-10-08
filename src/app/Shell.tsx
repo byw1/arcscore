@@ -3,9 +3,10 @@ import { NavLink, Outlet, Navigate, useNavigate, useLocation } from "react-route
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutGrid, Users, Sparkles, Megaphone, FileCheck2, UsersRound, Settings, Wallet, Inbox, Search, ChevronsUpDown, LogOut, RotateCcw, Check, Menu, X,
+  Building, SlidersHorizontal, Database, ScrollText, Bell,
 } from "lucide-react";
 import { useDemo } from "@/demo/store";
-import { ATHLETES, PERSONAS, schoolById, type PersonaKey } from "@/demo/data";
+import { ACTIVITY, ATHLETES, PERSONAS, schoolById, type PersonaKey } from "@/demo/data";
 import { Logo } from "@/components/ui/logo";
 import { Avatar, Kbd } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,61 @@ const NAV: Record<PersonaKey, NavItem[]> = {
     { to: "/app/opportunities", label: "Opportunities", icon: Inbox },
     { to: "/app/deals", label: "My deals", icon: FileCheck2 },
   ],
+  admin: [
+    { to: "/app", label: "Overview", icon: LayoutGrid, end: true },
+    { to: "/app/clients", label: "Clients", icon: Building },
+    { to: "/app/model", label: "Score model", icon: SlidersHorizontal },
+    { to: "/app/sources", label: "Data sources", icon: Database },
+    { to: "/app/audit", label: "Audit log", icon: ScrollText },
+  ],
 };
+
+function Notifications() {
+  const { state, dispatch } = useDemo();
+  const [open, setOpen] = useState(false);
+  const items = ACTIVITY[state.persona!];
+  const unread = !state.seenActivity[state.persona!];
+  return (
+    <div className="relative">
+      <button
+        onClick={() => {
+          setOpen((o) => !o);
+          if (unread) dispatch({ type: "markSeen" });
+        }}
+        className="focus-ring relative rounded-md p-1.5 text-ink-3 hover:bg-sunken hover:text-ink"
+        aria-label={unread ? `Notifications, ${items.length} new` : "Notifications"}
+        aria-expanded={open}
+      >
+        <Bell size={16} />
+        {unread && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-signal ring-2 ring-paper" />}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <>
+            <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.14 }}
+              className="absolute left-0 top-full z-40 mt-2 w-[300px] rounded-[14px] border border-line bg-surface p-2 shadow-[var(--shadow-float)]"
+            >
+              <div className="px-2.5 pb-1.5 pt-1.5 text-[13px] font-medium">Notifications</div>
+              <ul>
+                {items.map((e, i) => (
+                  <li key={i} className="flex gap-2.5 rounded-[10px] px-2.5 py-2 text-[12.5px] hover:bg-sunken/70">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt" />
+                    <span className="flex-1 text-ink-2">{e.text}<span className="mt-0.5 block text-[11.5px] text-ink-4">{e.t}</span></span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 const ORG_NAV: NavItem[] = [
   { to: "/app/team", label: "Team", icon: UsersRound },
   { to: "/app/settings", label: "Settings", icon: Settings },
@@ -195,7 +250,7 @@ function Sidebar({ onSearch, onNavigate }: { onSearch: () => void; onNavigate?: 
   );
   return (
     <div className="flex h-full flex-col gap-5 px-3 py-4">
-      <div className="px-1.5 pt-1"><Logo /></div>
+      <div className="flex items-center justify-between px-1.5 pt-1"><Logo /><Notifications /></div>
       <WorkspaceSwitcher />
       <button onClick={onSearch} className="focus-ring flex items-center gap-2 rounded-[9px] border border-line bg-surface px-2.5 py-[7px] text-[13px] text-ink-3 hover:border-line-strong">
         <Search size={14} />

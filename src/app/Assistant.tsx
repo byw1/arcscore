@@ -30,6 +30,12 @@ function answer(q: string, persona: PersonaKey): Omit<Extract<Turn, { role: "arc
       cards: risky,
     };
   }
+  if (persona === "admin") {
+    return {
+      steps: ["Read usage for 8 client workspaces", "Compared seat use with renewal dates", "Flagged accounts with falling activity"],
+      text: "Summit Auto Group is the one to call this week: one of three seats is in use, activity is down for six straight weeks, and it renews in November. Ridgeview's pilot is slow but steady; a roster import would likely unlock it. Everyone else is healthy.",
+    };
+  }
   if (persona === "athlete") {
     return {
       steps: ["Read your last 26 weeks of posts", "Compared you with 1,240 Power 4 wide receivers", "Found the factors with the most room"],
@@ -49,6 +55,7 @@ const SUGGEST: Record<PersonaKey, string[]> = {
   brand: ["Who should we add to March run?", "Find underpriced athletes in the Midwest", "Which deals need attention?"],
   school: ["Who is at portal risk?", "Where can we find money outside the cap?", "Summarize this week"],
   athlete: ["How do I grow my score?", "Is the Northline offer fair?", "What should I post this week?"],
+  admin: ["Which clients need attention?", "How did the last model change move scores?", "Is any data source unhealthy?"],
 };
 
 export function Assistant() {

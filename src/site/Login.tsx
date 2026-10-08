@@ -1,18 +1,20 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Building2, GraduationCap, User } from "lucide-react";
+import { ArrowRight, Building2, GraduationCap, User, ShieldHalf } from "lucide-react";
 import { useDemo } from "@/demo/store";
 import { PERSONAS, type PersonaKey } from "@/demo/data";
 import { Logo } from "@/components/ui/logo";
 import { Button, Input } from "@/components/ui/primitives";
 import { ScoreArc } from "@/components/ui/charts";
+import { canAfford3D, loadArcScene } from "@/lib/prefetch";
 
-const ArcScene = lazy(() => import("@/components/three/ArcScene"));
+const ArcScene = lazy(loadArcScene);
 
 const CHOICES: { key: PersonaKey; icon: typeof User; blurb: string }[] = [
   { key: "brand", icon: Building2, blurb: "Find athletes, run campaigns, measure lift" },
   { key: "school", icon: GraduationCap, blurb: "Roster value, revenue share, compliance" },
   { key: "athlete", icon: User, blurb: "Your score, offers and growth plan" },
+  { key: "admin", icon: ShieldHalf, blurb: "Internal console: clients, score model, data" },
 ];
 
 export function Login() {
@@ -20,7 +22,7 @@ export function Login() {
   const nav = useNavigate();
   const [busy, setBusy] = useState<PersonaKey | null>(null);
   const [wide, setWide] = useState(false);
-  useEffect(() => setWide(window.innerWidth >= 1024 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches), []);
+  useEffect(() => setWide(window.innerWidth >= 1024 && canAfford3D()), []);
   const enter = (k: PersonaKey) => {
     setBusy(k);
     setTimeout(() => {
@@ -50,7 +52,7 @@ export function Login() {
           <div className="space-y-2">
             {CHOICES.map((c) => (
               <button key={c.key} onClick={() => enter(c.key)} className="focus-ring group flex w-full items-center gap-3 rounded-[12px] border border-line bg-surface p-3 text-left shadow-[var(--shadow-card)] transition hover:border-line-strong">
-                <span className={`grid h-9 w-9 place-items-center rounded-[9px] ${c.key === "brand" ? "bg-sky text-sky-ink" : c.key === "school" ? "bg-peach text-peach-ink" : "bg-mint text-mint-ink"}`}><c.icon size={17} strokeWidth={1.8} /></span>
+                <span className={`grid h-9 w-9 place-items-center rounded-[9px] ${c.key === "brand" ? "bg-sky text-sky-ink" : c.key === "school" ? "bg-peach text-peach-ink" : c.key === "athlete" ? "bg-mint text-mint-ink" : "bg-lilac text-lilac-ink"}`}><c.icon size={17} strokeWidth={1.8} /></span>
                 <span className="flex-1">
                   <span className="block text-[13.5px] font-medium">{PERSONAS[c.key].org} <span className="font-normal text-ink-3">· {PERSONAS[c.key].orgKind}</span></span>
                   <span className="block text-[12.5px] text-ink-3">{c.blurb}</span>

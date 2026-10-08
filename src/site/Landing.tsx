@@ -7,8 +7,57 @@ import { Logo } from "@/components/ui/logo";
 import { ArcChart, Meter, RangeBar, ScoreArc } from "@/components/ui/charts";
 import { Avatar } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { canAfford3D, loadArcScene, prefetchApp } from "@/lib/prefetch";
 
-const ArcScene = lazy(() => import("@/components/three/ArcScene"));
+/** Paints instantly (pure SVG/CSS) and stays as the fallback when 3D is skipped. */
+function Poster({ className }: { className?: string }) {
+  return (
+    <div className={cn("absolute inset-0 bg-night", className)} aria-hidden>
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[radial-gradient(60%_80%_at_70%_100%,rgba(59,91,255,0.18),transparent_70%)]" />
+      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
+        <defs>
+          <linearGradient id="poster-arc" x1="0" x2="1">
+            <stop stopColor="#3b5bff" />
+            <stop offset="0.75" stopColor="#ff8a5c" />
+            <stop offset="1" stopColor="#ff5a1f" />
+          </linearGradient>
+          <radialGradient id="poster-ball" cx="0.35" cy="0.35" r="0.7">
+            <stop stopColor="#ffb08a" />
+            <stop offset="0.45" stopColor="#ff6a2b" />
+            <stop offset="1" stopColor="#9a2c05" />
+          </radialGradient>
+        </defs>
+        <g stroke="#1a2547" strokeWidth="1" opacity="0.8">
+          {Array.from({ length: 12 }, (_, i) => <line key={i} x1={720 + (i - 6) * 40} y1="640" x2={720 + (i - 6) * 260} y2="900" />)}
+          {[660, 700, 760, 840].map((y) => <line key={y} x1="0" x2="1440" y1={y} y2={y} />)}
+        </g>
+        <path d="M560 680 C 700 120, 1100 120, 1270 700" fill="none" stroke="#8ea0ff" strokeOpacity="0.18" strokeWidth="1.5" />
+        <path d="M560 680 C 640 360, 760 230, 880 200" fill="none" stroke="url(#poster-arc)" strokeWidth="5" strokeLinecap="round" />
+        <ellipse cx="1270" cy="720" rx="150" ry="22" fill="none" stroke="#8ea0ff" strokeOpacity="0.4" />
+        <ellipse cx="1270" cy="720" rx="70" ry="10" fill="none" stroke="#ff5a1f" strokeOpacity="0.7" />
+        <circle cx="890" cy="198" r="34" fill="url(#poster-ball)" />
+      </svg>
+    </div>
+  );
+}
+
+function use3D() {
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    if (!canAfford3D()) return;
+    // Let the text and poster paint first, then pull in three.js.
+    const go = () => setOk(true);
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(go, { timeout: 1200 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = setTimeout(go, 300);
+    return () => clearTimeout(t);
+  }, []);
+  return ok;
+}
+
+const ArcScene = lazy(loadArcScene);
 const ease = [0.2, 0.7, 0.2, 1] as const;
 const jordan = ATHLETES[0];
 
@@ -72,6 +121,8 @@ function Hero() {
   const progress = useRef(0.02);
   const [beat, setBeat] = useState(0);
   const [near, setNear] = useState(true);
+  const [ready, setReady] = useState(false);
+  const want3D = use3D();
   const reduced = useReducedMotion();
   const mobile = useIsMobile();
 
@@ -102,11 +153,14 @@ function Hero() {
   return (
     <section ref={wrap} data-dark className="relative h-[300vh] bg-night text-white" aria-label="Introduction">
       <div className="sticky top-0 h-[100svh] overflow-hidden">
-        <div className="absolute inset-0">
-          <Suspense fallback={<div className="h-full w-full bg-night" />}>
-            <ArcScene progress={progress} active={near && !reduced} lite={mobile} />
-          </Suspense>
-        </div>
+        <Poster className={cn("transition-opacity duration-1000", ready && "opacity-0")} />
+        {want3D && (
+          <div className={cn("absolute inset-0 transition-opacity duration-1000", ready ? "opacity-100" : "opacity-0")}>
+            <Suspense fallback={null}>
+              <ArcScene progress={progress} active={near && !reduced} lite={mobile} onReady={() => setReady(true)} />
+            </Suspense>
+          </div>
+        )}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_20%_40%,rgba(7,11,24,0.75)_0%,rgba(7,11,24,0.1)_55%,transparent_100%)]" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-night" />
 
@@ -244,6 +298,7 @@ const WHO = [
 const FACTOR_TINT = ["bg-sky text-sky-ink", "bg-peach text-peach-ink", "bg-lilac text-lilac-ink", "bg-signal-soft text-peach-ink", "bg-mint text-mint-ink", "bg-sand text-sand-ink"];
 
 export function Landing() {
+  useEffect(() => prefetchApp(), []);
   return (
     <div className="bg-paper text-ink">
       <Nav />
@@ -366,6 +421,8 @@ export function Landing() {
 function ClosingScene() {
   const ref = useRef<HTMLElement>(null);
   const [near, setNear] = useState(false);
+  const [ready, setReady] = useState(false);
+  const want3D = use3D();
   const reduced = useReducedMotion();
   const mobile = useIsMobile();
   useEffect(() => {
@@ -377,13 +434,14 @@ function ClosingScene() {
   }, []);
   return (
     <section ref={ref} data-dark className="relative h-[86vh] min-h-[560px] overflow-hidden bg-night text-white">
-      <div className="absolute inset-0">
-        {near && (
+      <Poster className={cn("transition-opacity duration-1000", ready && "opacity-0")} />
+      {want3D && near && (
+        <div className={cn("absolute inset-0 transition-opacity duration-1000", ready ? "opacity-100" : "opacity-0")}>
           <Suspense fallback={null}>
-            <ArcScene idle active={!reduced} lite={mobile} />
+            <ArcScene idle active={!reduced} lite={mobile} onReady={() => setReady(true)} />
           </Suspense>
-        )}
-      </div>
+        </div>
+      )}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_45%,rgba(7,11,24,0.7),transparent_75%)]" />
       <div className="relative flex h-full flex-col items-center justify-center px-5 text-center">
         <h2 className="display max-w-[14ch] text-[clamp(2.6rem,6vw,5.4rem)]">Every athlete has an <span className="text-arc">arc.</span></h2>

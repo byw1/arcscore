@@ -335,7 +335,7 @@ export const ROLES: { role: Role; desc: string }[] = [
 ];
 export type Member = { id: string; name: string; email: string; role: Role; team: string; lastActive: string; pending?: boolean };
 
-export type PersonaKey = "brand" | "school" | "athlete";
+export type PersonaKey = "brand" | "school" | "athlete" | "admin";
 export type Persona = {
   key: PersonaKey;
   org: string;
@@ -346,6 +346,20 @@ export type Persona = {
 };
 
 export const PERSONAS: Record<PersonaKey, Persona> = {
+  admin: {
+    key: "admin",
+    org: "ArcScore HQ",
+    orgKind: "Admin",
+    user: { name: "Sam Okoye", title: "Head of Operations", email: "sam@arcscore.ai", initials: "SO" },
+    teams: ["Operations", "Data science", "Customer success", "Engineering"],
+    members: [
+      { id: "m1", name: "Sam Okoye", email: "sam@arcscore.ai", role: "Owner", team: "Operations", lastActive: "Now" },
+      { id: "m2", name: "Lena Fischer", email: "lena@arcscore.ai", role: "Admin", team: "Data science", lastActive: "6m ago" },
+      { id: "m3", name: "Ravi Menon", email: "ravi@arcscore.ai", role: "Manager", team: "Customer success", lastActive: "1h ago" },
+      { id: "m4", name: "Chloe Martin", email: "chloe@arcscore.ai", role: "Analyst", team: "Data science", lastActive: "3h ago" },
+      { id: "m5", name: "Tom Becker", email: "tom@arcscore.ai", role: "Admin", team: "Engineering", lastActive: "Yesterday" },
+    ],
+  },
   brand: {
     key: "brand",
     org: "Northline Hydration",
@@ -392,6 +406,13 @@ export const PERSONAS: Record<PersonaKey, Persona> = {
 };
 
 export const ACTIVITY: Record<PersonaKey, { t: string; text: string }[]> = {
+  admin: [
+    { t: "10:14", text: "Score model v2.3 recomputed 84 athletes in 41 seconds." },
+    { t: "9:50", text: "Lakeshore State added 2 seats (now 7)." },
+    { t: "9:02", text: "TikTok ingestion recovered after a 14-minute rate-limit pause." },
+    { t: "Yesterday", text: "Northline Hydration renewed Brand Pro for 12 months." },
+    { t: "Mon", text: "Ridgeview University started a pilot." },
+  ],
   brand: [
     { t: "9:41", text: "Jordan Ellis posted reel 2 of 3 for Spring hydration launch. 412K reach so far." },
     { t: "9:12", text: "Deal file for Maya Okafor cleared NIL Go." },
@@ -429,3 +450,66 @@ export const fmtMoney = (n: number, compact = true) =>
 export const fmtCount = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M` : n >= 1000 ? `${Math.round(n / 1000)}K` : `${n}`;
 export const fmtRange = ([lo, hi]: [number, number]) => `${fmtMoney(lo)}–${fmtMoney(hi)}`;
+
+/* ---------------- ArcScore admin (internal console) ---------------- */
+
+export type Client = {
+  id: string;
+  name: string;
+  kind: "Brand" | "School" | "Collective" | "Agency";
+  plan: string;
+  seats: number;
+  seatsUsed: number;
+  mrr: number;
+  health: "Healthy" | "Watch" | "At risk";
+  renews: string;
+  since: string;
+  athletes: number;
+  persona?: PersonaKey; // demo workspace you can open as this client
+  usage: number[]; // weekly active seats, 12 weeks
+};
+
+const usage = (base: number, trend: number) => Array.from({ length: 12 }, (_, i) => Math.max(0, Math.round(base + trend * i + between(-1.2, 1.2))));
+
+export const CLIENTS: Client[] = [
+  { id: "cl1", name: "Lakeshore State Athletics", kind: "School", plan: "Athletic Department", seats: 10, seatsUsed: 7, mrr: 9500, health: "Healthy", renews: "Jul 2027", since: "Feb 2026", athletes: 412, persona: "school", usage: usage(4, 0.3) },
+  { id: "cl2", name: "Northline Hydration", kind: "Brand", plan: "Brand Pro", seats: 10, seatsUsed: 6, mrr: 4200, health: "Healthy", renews: "Oct 2027", since: "Apr 2026", athletes: 0, persona: "brand", usage: usage(3, 0.25) },
+  { id: "cl3", name: "Ridgeview University", kind: "School", plan: "Pilot", seats: 5, seatsUsed: 2, mrr: 0, health: "Watch", renews: "Dec 2026", since: "Oct 2026", athletes: 388, usage: usage(1, 0.08) },
+  { id: "cl4", name: "Kestrel Athletic", kind: "Brand", plan: "Brand Pro", seats: 15, seatsUsed: 12, mrr: 6300, health: "Healthy", renews: "Mar 2027", since: "Jan 2026", athletes: 0, usage: usage(8, 0.2) },
+  { id: "cl5", name: "Summit Auto Group", kind: "Brand", plan: "Brand Starter", seats: 3, seatsUsed: 1, mrr: 900, health: "At risk", renews: "Nov 2026", since: "May 2026", athletes: 0, usage: usage(2, -0.15) },
+  { id: "cl6", name: "Harbor Collective", kind: "Collective", plan: "Collective", seats: 6, seatsUsed: 5, mrr: 2800, health: "Healthy", renews: "Aug 2027", since: "Mar 2026", athletes: 96, usage: usage(4, 0.05) },
+  { id: "cl7", name: "Mesa Valley State", kind: "School", plan: "Athletic Department", seats: 8, seatsUsed: 3, mrr: 6500, health: "Watch", renews: "Jun 2027", since: "Jun 2026", athletes: 301, usage: usage(3, -0.05) },
+  { id: "cl8", name: "Fieldhouse Sports Mgmt", kind: "Agency", plan: "API", seats: 4, seatsUsed: 4, mrr: 3500, health: "Healthy", renews: "Feb 2027", since: "Jul 2026", athletes: 58, usage: usage(3, 0.1) },
+];
+
+export type Source = { name: string; kind: string; status: "Healthy" | "Degraded" | "Paused"; lastSync: string; records: number; latency: string; errors: number; volume: number[] };
+export const SOURCES: Source[] = [
+  { name: "Instagram Graph", kind: "Social", status: "Healthy", lastSync: "2 min ago", records: 1_284_000, latency: "1.2s", errors: 0.1, volume: usage(80, 1.5) },
+  { name: "TikTok", kind: "Social", status: "Degraded", lastSync: "14 min ago", records: 842_000, latency: "4.8s", errors: 2.4, volume: usage(70, 0.5) },
+  { name: "YouTube Data", kind: "Social", status: "Healthy", lastSync: "6 min ago", records: 96_000, latency: "0.9s", errors: 0, volume: usage(20, 0.3) },
+  { name: "X", kind: "Social", status: "Paused", lastSync: "3 h ago", records: 211_000, latency: "–", errors: 0, volume: usage(30, -1.5) },
+  { name: "Box scores & stats", kind: "Performance", status: "Healthy", lastSync: "1 min ago", records: 3_920_000, latency: "0.4s", errors: 0, volume: usage(60, 2) },
+  { name: "Recruiting & rankings", kind: "Performance", status: "Healthy", lastSync: "1 h ago", records: 58_000, latency: "2.0s", errors: 0.3, volume: usage(12, 0.2) },
+  { name: "Media mentions", kind: "Momentum", status: "Healthy", lastSync: "9 min ago", records: 412_000, latency: "1.6s", errors: 0.2, volume: usage(40, 0.8) },
+  { name: "Deal outcomes", kind: "Market", status: "Healthy", lastSync: "Nightly", records: 18_400, latency: "–", errors: 0, volume: usage(8, 0.4) },
+];
+
+export type AuditEvent = { at: string; actor: string; org: string; action: string; detail: string };
+export const AUDIT: AuditEvent[] = [
+  { at: "Oct 8, 10:14", actor: "Lena Fischer", org: "ArcScore HQ", action: "Model published", detail: "Score model v2.3: Momentum weight 15 → 16" },
+  { at: "Oct 8, 9:50", actor: "Marcus Reid", org: "Lakeshore State Athletics", action: "Seats changed", detail: "5 → 7 seats" },
+  { at: "Oct 8, 9:31", actor: "Tasha Greene", org: "Lakeshore State Athletics", action: "Deal file approved", detail: "4 files submitted to NIL Go" },
+  { at: "Oct 8, 9:12", actor: "System", org: "Northline Hydration", action: "Deal file cleared", detail: "Maya Okafor × Northline, $9.5K" },
+  { at: "Oct 7, 17:40", actor: "Avery Chen", org: "Northline Hydration", action: "Plan renewed", detail: "Brand Pro, 12 months" },
+  { at: "Oct 7, 15:02", actor: "Ravi Menon", org: "ArcScore HQ", action: "Workspace opened as client", detail: "Support session for Summit Auto Group (read-only)" },
+  { at: "Oct 7, 11:26", actor: "Daniel Okoro", org: "Northline Hydration", action: "Offers sent", detail: "3 offers for March run" },
+  { at: "Oct 6, 16:18", actor: "Tom Becker", org: "ArcScore HQ", action: "Source paused", detail: "X ingestion paused pending API terms" },
+  { at: "Oct 6, 10:03", actor: "Sam Okoye", org: "ArcScore HQ", action: "Client created", detail: "Ridgeview University (pilot, 5 seats)" },
+];
+
+/** Model weights (percent). Must sum to 100. */
+export const DEFAULT_WEIGHTS: Record<FactorKey, number> = { reach: 22, resonance: 20, performance: 18, momentum: 16, fit: 14, integrity: 10 };
+export const scoreWith = (a: Athlete, w: Record<FactorKey, number>) => {
+  const total = Object.values(w).reduce((s, v) => s + v, 0) || 1;
+  return Math.round((Object.keys(w) as FactorKey[]).reduce((s, k) => s + a.factors[k] * w[k], 0) / total);
+};
