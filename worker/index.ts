@@ -63,10 +63,19 @@ app.post("/leads", async (c) => {
 
 app.notFound((c) => c.json({ ok: false, error: "Not found" }, 404));
 
+// Only the production domain may be indexed; previews (workers.dev, branch
+// previews, pitch subdomains) are served with noindex.
+const INDEXABLE_HOSTS = new Set(["arcscore.ai", "www.arcscore.ai"]);
+
 export default {
-  fetch(request, env, ctx) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith("/api/")) return app.fetch(request, env, ctx);
-    return env.ASSETS.fetch(request);
+    const res = url.pathname.startsWith("/api/")
+      ? await app.fetch(request, env, ctx)
+      : await env.ASSETS.fetch(request);
+    if (INDEXABLE_HOSTS.has(url.hostname)) return res;
+    const out = new Response(res.body, res);
+    out.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return out;
   },
 } satisfies ExportedHandler<Env>;
