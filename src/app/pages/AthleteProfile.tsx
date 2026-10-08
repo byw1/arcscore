@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeft, ShieldCheck } from "lucide-react";
 import { useDemo } from "@/demo/store";
-import { ATHLETES, CAMPAIGNS, FACTOR_META, athleteById, brandById, schoolById, fmtCount, fmtMoney, fmtRange } from "@/demo/data";
+import { ATHLETES, FACTOR_META, athleteById, brandById, schoolById, fmtCount, fmtMoney, fmtRange } from "@/demo/data";
 import { Avatar, Button, Card, CardHeader, Input, Modal, Select, Status, Tag } from "@/components/ui/primitives";
 import { ArcChart, Meter, RangeBar, ScoreArc } from "@/components/ui/charts";
 import { fileTone } from "./Deals";
@@ -33,6 +33,7 @@ export function AthleteProfile() {
           <h1 className="title text-[26px] tracking-[-0.035em]">{a.name}</h1>
           <p className="mt-0.5 text-[14px] text-ink-3">{a.sport} · {a.position} · {a.year} · {school.name} ({school.tier}) · From {a.hometown}</p>
         </div>
+        <Link to={`/kit/${a.id}`} target="_blank" className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-[9px] px-3 text-[13.5px] text-ink-2 hover:bg-sunken hover:text-ink">Media kit ↗</Link>
         {isBrand && (
           <div className="flex gap-2">
             <Button onClick={() => dispatch({ type: "toggleShortlist", athleteId: a.id })}>{shortlisted ? "Shortlisted" : "Add to shortlist"}</Button>
@@ -123,7 +124,8 @@ export function AthleteProfile() {
 }
 
 function OfferModal({ open, onClose, athleteId }: { open: boolean; onClose: () => void; athleteId: string }) {
-  const { dispatch } = useDemo();
+  const { state, dispatch } = useDemo();
+  const CAMPAIGNS = state.campaigns;
   const a = athleteById(athleteId)!;
   const options = CAMPAIGNS.filter((c) => c.status !== "Complete").map((c) => c.name);
   const [campaign, setCampaign] = useState(options[0]);

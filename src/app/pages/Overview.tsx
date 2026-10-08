@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { useDemo } from "@/demo/store";
-import { ATHLETES, CAMPAIGNS, ACTIVITY, FACTOR_META, OPPORTUNITIES, REV_SHARE_CAP, marketValue, riskFor, athleteById, brandById, fmtCount, fmtMoney, fmtRange } from "@/demo/data";
+import { ATHLETES, ACTIVITY, FACTOR_META, OPPORTUNITIES, REV_SHARE_CAP, marketValue, riskFor, athleteById, brandById, fmtCount, fmtMoney, fmtRange } from "@/demo/data";
 import { Avatar, Card, CardHeader, PageHeader, Stat, Status, Button } from "@/components/ui/primitives";
 import { ArcChart, Meter, ScoreArc, ShareBar, Spark } from "@/components/ui/charts";
 import { fileTone } from "./Deals";
+import { AdminOverview } from "./Admin";
 
 function Activity() {
   const { state } = useDemo();
@@ -25,6 +26,7 @@ function Activity() {
 
 function BrandOverview() {
   const { state, persona } = useDemo();
+  const CAMPAIGNS = state.campaigns;
   const deals = state.deals.filter((d) => d.brandId === "northline");
   const live = CAMPAIGNS.find((c) => c.id === "c1")!;
   const committed = deals.filter((d) => ["Contracted", "Live", "Complete"].includes(d.stage)).reduce((s, d) => s + d.amount, 0);
@@ -172,7 +174,7 @@ function AthleteOverview() {
   const earned = state.deals.filter((d) => d.athleteId === me.id && ["Complete", "Live", "Contracted"].includes(d.stage)).reduce((s, d) => s + d.amount, 0);
   return (
     <>
-      <PageHeader title="Hi, Jordan" sub="Your score rose 2 points after Saturday's game." />
+      <PageHeader title="Hi, Jordan" sub="Your score rose 2 points after Saturday's game." actions={<Link to="/kit/a000" target="_blank"><Button>Share media kit ↗</Button></Link>} />
       <div className="grid gap-5 lg:grid-cols-[1fr_1.4fr]">
         <Card className="flex flex-col items-center justify-center py-10">
           <ScoreArc score={me.score} size={250} arc={me.arc} />
@@ -229,6 +231,7 @@ function AthleteOverview() {
 
 export function Overview() {
   const { state } = useDemo();
+  if (state.persona === "admin") return <AdminOverview />;
   if (state.persona === "school") return <SchoolOverview />;
   if (state.persona === "athlete") return <AthleteOverview />;
   return <BrandOverview />;

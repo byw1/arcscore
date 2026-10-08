@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from "react";
-import { DEALS, OPPORTUNITIES, PERSONAS, type Deal, type DealStage, type FileStatus, type Member, type PersonaKey, type Role } from "./data";
+import { CAMPAIGNS, DEALS, DEFAULT_WEIGHTS, OPPORTUNITIES, PERSONAS, type Campaign, type Deal, type DealStage, type FactorKey, type FileStatus, type Member, type PersonaKey, type Role } from "./data";
 
 /*
   The whole demo runs in the browser. State starts from the fixed dataset and
@@ -14,6 +14,10 @@ type State = {
   shortlist: string[]; // athlete ids
   opportunities: Record<string, "open" | "accepted" | "declined">;
   allocations: Record<string, number>; // athleteId -> rev-share override
+  campaigns: Campaign[];
+  weights: Record<FactorKey, number>;
+  modelVersion: string;
+  seenActivity: Record<string, boolean>; // persona -> notifications read
   toast: string | null;
 };
 
@@ -30,18 +34,26 @@ type Action =
   | { type: "toggleShortlist"; athleteId: string }
   | { type: "respond"; id: string; answer: "accepted" | "declined" }
   | { type: "allocate"; athleteId: string; amount: number }
+  | { type: "addCampaign"; campaign: Campaign }
+  | { type: "setWeights"; weights: Record<FactorKey, number> }
+  | { type: "publishModel" }
+  | { type: "markSeen" }
   | { type: "toast"; text: string | null };
 
-const KEY = "arcscore-demo-v1";
+const KEY = "arcscore-demo-v2";
 
 function initial(): State {
   return {
     persona: null,
     deals: DEALS,
-    members: { brand: PERSONAS.brand.members, school: PERSONAS.school.members, athlete: PERSONAS.athlete.members },
+    members: { brand: PERSONAS.brand.members, school: PERSONAS.school.members, athlete: PERSONAS.athlete.members, admin: PERSONAS.admin.members },
     shortlist: [],
     opportunities: Object.fromEntries(OPPORTUNITIES.map((o) => [o.id, "open" as const])),
     allocations: {},
+    campaigns: CAMPAIGNS,
+    weights: DEFAULT_WEIGHTS,
+    modelVersion: "2.3",
+    seenActivity: {},
     toast: null,
   };
 }
@@ -86,6 +98,16 @@ function reducer(s: State, a: Action): State {
       return { ...s, opportunities: { ...s.opportunities, [a.id]: a.answer } };
     case "allocate":
       return { ...s, allocations: { ...s.allocations, [a.athleteId]: a.amount } };
+    case "addCampaign":
+      return { ...s, campaigns: [...s.campaigns, a.campaign] };
+    case "setWeights":
+      return { ...s, weights: a.weights };
+    case "publishModel": {
+      const [maj, min] = s.modelVersion.split(".").map(Number);
+      return { ...s, modelVersion: `${maj}.${min + 1}`, toast: `Score model v${maj}.${min + 1} published` };
+    }
+    case "markSeen":
+      return { ...s, seenActivity: { ...s.seenActivity, [p]: true } };
     case "toast":
       return { ...s, toast: a.text };
   }

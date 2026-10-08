@@ -14,6 +14,12 @@ const INTEGRATIONS: Record<string, { name: string; desc: string; on: boolean }[]
     { name: "Slack", desc: "Compliance alerts in #nil-compliance", on: true },
     { name: "Okta", desc: "Single sign-on for staff", on: false },
   ],
+  admin: [
+    { name: "Stripe", desc: "Subscriptions and invoicing", on: true },
+    { name: "HubSpot", desc: "Client CRM and renewals", on: true },
+    { name: "PagerDuty", desc: "Data-source incident alerts", on: true },
+    { name: "Okta", desc: "Staff single sign-on", on: true },
+  ],
   athlete: [
     { name: "Instagram", desc: "Audience and engagement", on: true },
     { name: "TikTok", desc: "Audience and engagement", on: true },
@@ -47,7 +53,7 @@ export function Settings() {
             ))}
           </ul>
         </Card>
-        {persona.key !== "athlete" && (
+        {persona.key !== "athlete" && persona.key !== "admin" && (
           <Card>
             <CardHeader title="Plan" />
             <div className="flex items-center justify-between">

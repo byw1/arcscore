@@ -1,6 +1,6 @@
-import { useMemo, useRef, type RefObject } from "react";
+import { useMemo, useRef, useState, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, Lightformer, MeshReflectorMaterial, Grid, Sparkles, Float } from "@react-three/drei";
+import { Environment, Lightformer, MeshReflectorMaterial, Grid, Sparkles, Float, PerformanceMonitor } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 
@@ -131,14 +131,17 @@ function Target({ at, t }: { at: THREE.Vector3; t: RefObject<number> }) {
   );
 }
 
-function Floor() {
+function Floor({ lite }: { lite: boolean }) {
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[80, 80]} />
+        {lite ? (
+          <meshStandardMaterial color="#0a1022" roughness={0.55} metalness={0.4} />
+        ) : (
         <MeshReflectorMaterial
           blur={[300, 80]}
-          resolution={1024}
+          resolution={512}
           mixBlur={1}
           mixStrength={22}
           roughness={0.85}
@@ -149,6 +152,7 @@ function Floor() {
           metalness={0.6}
           mirror={0.6}
         />
+        )}
       </mesh>
       <Grid
         position={[0, 0.006, 0]}
@@ -202,18 +206,33 @@ function Driver({ progress, t, idle }: { progress?: RefObject<number>; t: RefObj
   return null;
 }
 
-export default function ArcScene({ progress, active, lite = false, idle = false }: { progress?: RefObject<number>; active: boolean; lite?: boolean; idle?: boolean }) {
+/** Tells the page the first frame is on screen, so it can fade the canvas in over the poster. */
+function ReadySignal({ onReady }: { onReady?: () => void }) {
+  const done = useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    done.current = true;
+    requestAnimationFrame(() => onReady?.());
+  });
+  return null;
+}
+
+export default function ArcScene({ progress, active, lite = false, idle = false, onReady }: { progress?: RefObject<number>; active: boolean; lite?: boolean; idle?: boolean; onReady?: () => void }) {
   const curve = useArc(lite);
   const end = useMemo(() => curve.getPointAt(1), [curve]);
   const t = useRef(0.02);
+  // Start sharp, step resolution down if the device can't hold frame rate.
+  const [dpr, setDpr] = useState(lite ? 1.25 : 1.75);
   return (
     <Canvas
       frameloop={active ? "always" : "never"}
-      shadows
-      dpr={[1, lite ? 1.5 : 2]}
+      shadows={!lite}
+      dpr={dpr}
       camera={{ position: [-3.2, 1.6, 9.5], fov: lite ? 55 : 38 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
     >
+      <PerformanceMonitor onDecline={() => setDpr((d) => Math.max(0.75, d - 0.5))} onIncline={() => setDpr((d) => Math.min(lite ? 1.5 : 2, d + 0.25))} />
+      <ReadySignal onReady={onReady} />
       <color attach="background" args={[NIGHT]} />
       <fog attach="fog" args={[NIGHT, 12, 34]} />
       <ambientLight intensity={0.15} />
@@ -227,7 +246,7 @@ export default function ArcScene({ progress, active, lite = false, idle = false 
 
       <Driver progress={progress} t={t} idle={idle} />
       <Rig t={t} lite={lite} />
-      <Floor />
+      <Floor lite={lite} />
       <Trajectory curve={curve} t={t} />
       <Target at={end} t={t} />
       <Ball curve={curve} t={t} />
@@ -235,10 +254,12 @@ export default function ArcScene({ progress, active, lite = false, idle = false 
         <Sparkles count={lite ? 30 : 70} scale={[16, 7, 8]} position={[0, 3.5, -1]} size={1.6} speed={0.25} opacity={0.45} color="#c9d3ff" />
       </Float>
 
-      <EffectComposer multisampling={0}>
-        <Bloom intensity={0.85} luminanceThreshold={0.55} luminanceSmoothing={0.25} mipmapBlur />
-        <Vignette eskil={false} offset={0.25} darkness={0.7} />
-      </EffectComposer>
+      {!lite && (
+        <EffectComposer multisampling={0}>
+          <Bloom intensity={0.85} luminanceThreshold={0.55} luminanceSmoothing={0.25} mipmapBlur />
+          <Vignette eskil={false} offset={0.25} darkness={0.7} />
+        </EffectComposer>
+      )}
     </Canvas>
   );
 }
