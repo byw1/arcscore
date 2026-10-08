@@ -1,53 +1,31 @@
-# ArcScore: marketing site
+# ArcScore: concept site and demo app
 
-Landing page for [arcscore.ai](https://arcscore.ai): the valuation and placement engine for college NIL.
-The business audit, competitor landscape and product blueprint are in [`docs/AUDIT.md`](docs/AUDIT.md).
+A rebrand and clickable product demo for [arcscore.ai](https://arcscore.ai). Everything runs in the browser on fictional demo data; there is no backend database.
+
+- `/` is the landing page
+- `/login` is the demo sign-in (credentials pre-filled), with one-click entry to three workspaces:
+  - **Northline Hydration** (brand): overview, Discover (brief → ranked matches), Athletes, Campaigns (pipeline board), Deal files
+  - **Lakeshore State Athletics** (school): overview, Roster value (revenue-share modeling vs. the cap with portal risk), Athletes, Deal files
+  - **Jordan Ellis** (athlete): My score, Opportunities (accept or decline offers), My deals
+  - All three: Team management (invite, roles, remove), Settings, ⌘K athlete search, and the Ask Arc assistant
+- Changes (moving deals, invites, allocations) persist in `localStorage`. Use **Reset demo** to start over.
+
+Brand system: [`docs/BRAND.md`](docs/BRAND.md). Business audit and competitive landscape: [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Stack
+Vite, React 19, TypeScript, Tailwind CSS v4, Framer Motion and React Router, served by a Cloudflare Worker with static assets (`worker/index.ts`).
 
-- **Vite + React 19 + TypeScript**, **Tailwind CSS v4**, **Framer Motion**
-- **three.js / React Three Fiber / drei / postprocessing** for the 3D scenes (`src/components/three/`)
-- 21st.dev-style UI primitives in `src/components/ui/` (Spotlight, Number Ticker, Marquee, Shimmer Button, Tilt Card, Glow Card, Animated Beam, Text Effect)
-- **Cloudflare Worker** (`worker/index.ts`, Hono) serves the static build and `/api/*`
+- Demo data: `src/demo/data.ts` (deterministic, seeded)
+- Demo state: `src/demo/store.tsx`
+- Product: `src/app/`
+- Marketing pages: `src/site/`
 
 ## Develop
-
 ```bash
 npm install
-npm run dev        # Vite on :5173 (proxies /api to :8787)
-npx wrangler dev   # in a second terminal, for the API (serves ./dist)
+npm run dev        # http://localhost:5173
+npm run preview    # build and run on the Workers runtime
 ```
 
-`npm run preview` builds the site and runs it on the real Workers runtime.
-
-## Deploy to Cloudflare
-
-```bash
-npx wrangler login
-npm run deploy     # vite build + wrangler deploy
-```
-
-Then add `arcscore.ai` as a custom domain on the `arcscore-web` Worker in the Cloudflare dashboard.
-
-### Continuous deploys (Workers Builds)
-
-In the Cloudflare dashboard: **Workers & Pages → Create → Import a repository → `byw1/arcscore`**.
-Use Worker name `arcscore-web`, build command `npm run build`, deploy command `npx wrangler deploy`.
-Every push to `main` then deploys, and other branches get preview URLs.
-
-### Leads database
-
-Leads are stored in the D1 database `arcscore` (bound as `DB`, already created; schema in `migrations/`).
-
-```bash
-npx wrangler d1 migrations apply arcscore --local    # local dev
-npx wrangler d1 migrations apply arcscore --remote   # after adding a new migration
-npx wrangler d1 execute arcscore --remote --command "select * from leads order by created_at desc limit 20"
-```
-
-## API
-
-| Method | Path | Body |
-|---|---|---|
-| GET | `/api/health` | none |
-| POST | `/api/leads` | `{ email, audience: "brand" \| "school" \| "athlete" \| "investor", name?, org?, message?, source? }` |
+## Deploy (Cloudflare Workers Builds)
+In the Cloudflare dashboard, go to **Workers & Pages → Create → Import a repository → `byw1/arcscore`**. Use Worker name `arcscore-web`, build command `npm run build` and deploy command `npx wrangler deploy`. Every host except `arcscore.ai` is served with `X-Robots-Tag: noindex`.

@@ -135,17 +135,7 @@ The data flywheel (every placement and its outcome trains the model), the method
 
 ## 7. What was built in this repo
 
-A production-ready landing page (Vite + React + three.js / React Three Fiber + Tailwind + Framer Motion) deployed as a **Cloudflare Worker with static assets**:
-
-- **3D hero:** a ball traces the arc over a yard-line field into a scoring target, over a constellation of scored athletes, with scroll-driven camera, bloom and parallax.
-- **3D ArcScore core:** an interactive orb with six orbiting factor satellites, synced with hover cards and a tilting sample athlete card.
-- **3D finale:** dozens of athlete trajectories converging on one placement.
-- Sections: problem and market stats, "Two numbers" score anatomy, Launch → Trajectory → Score explainer, tabbed brand / school / athlete solutions with product mockups, placement-engine animated beams, NIL Go compliance with fair-market range, platform bento grid, founder thesis, and segmented lead capture.
-- **21st.dev component patterns** (Spotlight, Number Ticker, Marquee, Shimmer/Magnetic Button, 3D Tilt Card, Glowing Card, Animated Beam, Text Effect), adapted under `src/components/ui/`. The 21st.dev registry needs a signed-in account to install from directly, so these were rebuilt to match. Anything new from 21st.dev can be dropped in with `npx shadcn add`.
-- **`/api/leads`**: a Hono endpoint with validation and a honeypot. It writes to D1 when bound and logs otherwise.
-- Performance and accessibility: 3D scenes are lazy-loaded, pause off-screen, honor `prefers-reduced-motion`, and use lighter scenes on mobile. Also skip link, ARIA tabs and radios, and no horizontal scroll at 390px.
-
-**Sample data disclaimer:** athlete names and numbers in the mockups are illustrative and labeled "Sample" on the page.
+The first 3D landing page has been replaced by a full rebrand (see `docs/BRAND.md`) and a clickable product demo with brand, school and athlete workspaces running on fictional data. See the README for the tour.
 
 ---
 
