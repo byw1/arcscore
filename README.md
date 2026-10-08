@@ -29,15 +29,21 @@ npm run deploy     # vite build + wrangler deploy
 
 Then add `arcscore.ai` as a custom domain on the `arcscore-web` Worker in the Cloudflare dashboard.
 
-### Persist leads (optional)
+### Continuous deploys (Workers Builds)
+
+In the Cloudflare dashboard: **Workers & Pages → Create → Import a repository → `byw1/arcscore`**.
+Use Worker name `arcscore-web`, build command `npm run build`, deploy command `npx wrangler deploy`.
+Every push to `main` then deploys, and other branches get preview URLs.
+
+### Leads database
+
+Leads are stored in the D1 database `arcscore` (bound as `DB`, already created; schema in `migrations/`).
 
 ```bash
-npx wrangler d1 create arcscore
-# paste the database_id into the commented d1_databases block in wrangler.jsonc, then:
-npx wrangler d1 migrations apply arcscore --remote
+npx wrangler d1 migrations apply arcscore --local    # local dev
+npx wrangler d1 migrations apply arcscore --remote   # after adding a new migration
+npx wrangler d1 execute arcscore --remote --command "select * from leads order by created_at desc limit 20"
 ```
-
-Without D1 bound, `/api/leads` validates the request and writes it to Workers logs.
 
 ## API
 
