@@ -76,7 +76,7 @@ export function AthleteProfile() {
                 {platforms.map(([p, v]) => (
                   <li key={p} className="grid grid-cols-[72px_1fr_44px] items-center gap-3 text-[13px]">
                     <span className="capitalize text-ink-2">{p === "x" ? "X" : p === "tiktok" ? "TikTok" : p === "youtube" ? "YouTube" : "Instagram"}</span>
-                    <span className="h-[5px] rounded-full bg-sunken"><span className="block h-full rounded-full bg-ink" style={{ width: `${(v / maxP) * 100}%` }} /></span>
+                    <span className="h-[5px] rounded-full bg-sunken"><span className="block h-full rounded-full bg-cobalt" style={{ width: `${(v / maxP) * 100}%` }} /></span>
                     <span className="num text-right text-ink-3">{fmtCount(v)}</span>
                   </li>
                 ))}

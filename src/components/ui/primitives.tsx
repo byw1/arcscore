@@ -11,7 +11,7 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ 
       className={cn(
         "focus-ring inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-[9px] font-medium transition-[background,box-shadow,color] duration-150 disabled:pointer-events-none disabled:opacity-40",
         size === "sm" ? "h-7 px-2.5 text-[12.5px]" : "h-9 px-3.5 text-[13.5px]",
-        variant === "primary" && "bg-ink text-paper hover:bg-ink/85",
+        variant === "primary" && "bg-ink text-paper shadow-[0_1px_0_rgb(255_255_255/0.12)_inset,0_2px_8px_-2px_rgb(17_17_16/0.35)] hover:bg-ink/85",
         variant === "secondary" && "border border-line-strong bg-surface text-ink shadow-[var(--shadow-card)] hover:bg-sunken/60",
         variant === "ghost" && "text-ink-2 hover:bg-sunken hover:text-ink",
         variant === "danger" && "text-bad hover:bg-bad-soft",
@@ -22,12 +22,16 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ 
   );
 });
 
-export function Avatar({ initials, size = 28, className, tone = "neutral" }: { initials: string; size?: number; className?: string; tone?: "neutral" | "ink" }) {
+const TINTS = ["bg-peach text-peach-ink", "bg-sky text-sky-ink", "bg-mint text-mint-ink", "bg-lilac text-lilac-ink", "bg-sand text-sand-ink"];
+const tintFor = (s: string) => TINTS[[...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 997, 7) % TINTS.length];
+
+/** Avatars get a soft tint picked from the initials, so the same person is always the same color. */
+export function Avatar({ initials, size = 28, className, tone = "tint" }: { initials: string; size?: number; className?: string; tone?: "tint" | "ink" }) {
   return (
     <span
       className={cn(
         "inline-grid shrink-0 place-items-center rounded-full font-medium",
-        tone === "ink" ? "bg-ink text-paper" : "bg-sunken text-ink-2 ring-1 ring-line ring-inset",
+        tone === "ink" ? "bg-ink text-paper" : tintFor(initials),
         className
       )}
       style={{ width: size, height: size, fontSize: Math.max(10, size * 0.38) }}

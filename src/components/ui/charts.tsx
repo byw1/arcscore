@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
   The score gauge is the logo, drawn to scale: a half arc whose length is the
   score, with the ball where the athlete currently sits.
 */
-export function ScoreArc({ score, size = 180, label = "ArcScore", arc }: { score: number; size?: number; label?: string; arc?: number }) {
+export function ScoreArc({ score, size = 180, label = "ArcScore", arc, dark }: { score: number; size?: number; label?: string; arc?: number; dark?: boolean }) {
+  const gid = useId().replace(/:/g, "");
   const r = 42;
   const len = Math.PI * r;
   const t = score / 100;
@@ -16,11 +17,18 @@ export function ScoreArc({ score, size = 180, label = "ArcScore", arc }: { score
   return (
     <div className="relative" style={{ width: size, height: size * 0.62 }}>
       <svg viewBox="0 0 100 58" className="h-full w-full overflow-visible" role="img" aria-label={`${label} ${score} out of 100`}>
-        <path d="M8 50a42 42 0 0 1 84 0" fill="none" stroke="var(--color-line)" strokeWidth="3" strokeLinecap="round" />
+        <defs>
+          <linearGradient id={`sa-${gid}`} x1="0" x2="1" y1="0" y2="0">
+            <stop stopColor="var(--color-cobalt)" />
+            <stop offset="0.7" stopColor="#8a6bff" />
+            <stop offset="1" stopColor="var(--color-signal)" />
+          </linearGradient>
+        </defs>
+        <path d="M8 50a42 42 0 0 1 84 0" fill="none" stroke={dark ? "rgba(255,255,255,0.12)" : "var(--color-line)"} strokeWidth="3" strokeLinecap="round" />
         <motion.path
           d="M8 50a42 42 0 0 1 84 0"
           fill="none"
-          stroke="var(--color-ink)"
+          stroke={`url(#sa-${gid})`}
           strokeWidth="3"
           strokeLinecap="round"
           strokeDasharray={len}
@@ -32,9 +40,9 @@ export function ScoreArc({ score, size = 180, label = "ArcScore", arc }: { score
       </svg>
       <div className="absolute inset-x-0 bottom-0 text-center">
         <div className="num font-medium tracking-[-0.05em]" style={{ fontSize: size * 0.24, lineHeight: 1 }}>{score}</div>
-        <div className="mt-1 text-[11.5px] text-ink-3">
+        <div className={cn("mt-1 text-[11.5px]", dark ? "text-white/55" : "text-ink-3")}>
           {label}
-          {arc !== undefined && <span className={cn("num ml-1.5 font-medium", arc >= 0 ? "text-good" : "text-bad")}>{arc >= 0 ? "↑" : "↓"} {Math.abs(arc)} arc</span>}
+          {arc !== undefined && <span className={cn("num ml-1.5 font-medium", arc >= 0 ? (dark ? "text-[#8ea0ff]" : "text-cobalt") : "text-bad")}>{arc >= 0 ? "↑" : "↓"} {Math.abs(arc)} arc</span>}
         </div>
       </div>
     </div>
@@ -78,8 +86,8 @@ export function ArcChart({ history, arc, height = 200, weeksLabel = "26 weeks" }
       >
         <defs>
           <linearGradient id={`fill-${id}`} x1="0" x2="0" y1="0" y2="1">
-            <stop stopColor="var(--color-ink)" stopOpacity="0.07" />
-            <stop offset="1" stopColor="var(--color-ink)" stopOpacity="0" />
+            <stop stopColor="var(--color-cobalt)" stopOpacity="0.16" />
+            <stop offset="1" stopColor="var(--color-cobalt)" stopOpacity="0" />
           </linearGradient>
         </defs>
         {ticks.map((t) => (
@@ -88,11 +96,11 @@ export function ArcChart({ history, arc, height = 200, weeksLabel = "26 weeks" }
             <text x={padL - 8} y={y(t) + 3.5} textAnchor="end" className="fill-ink-4 font-mono text-[10px]">{t}</text>
           </g>
         ))}
-        <rect x={x(nowI)} y={padT} width={x(n) - x(nowI)} height={H - padT - padB} fill="var(--color-sunken)" opacity="0.6" />
+        <rect x={x(nowI)} y={padT} width={x(n) - x(nowI)} height={H - padT - padB} fill="var(--color-signal-soft)" opacity="0.7" />
         <text x={x(nowI) + 8} y={padT + 12} className="fill-ink-3 font-mono text-[10px]">PROJECTED</text>
         <path d={area} fill={`url(#fill-${id})`} />
-        <motion.path d={hist} fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, ease: [0.2, 0.7, 0.2, 1] }} />
-        <path d={projPath} fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeDasharray="3 5" strokeLinecap="round" opacity="0.55" />
+        <motion.path d={hist} fill="none" stroke="var(--color-cobalt)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, ease: [0.2, 0.7, 0.2, 1] }} />
+        <path d={projPath} fill="none" stroke="var(--color-signal)" strokeWidth="2" strokeDasharray="3 5" strokeLinecap="round" opacity="0.7" />
         <circle cx={x(nowI)} cy={y(history[nowI])} r="5" fill="var(--color-signal)" stroke="var(--color-surface)" strokeWidth="2" />
         <text x={padL} y={H - 6} className="fill-ink-4 font-mono text-[10px]">{weeksLabel} ago</text>
         <text x={x(nowI)} y={H - 6} textAnchor="middle" className="fill-ink-3 font-mono text-[10px]">NOW</text>
@@ -100,7 +108,7 @@ export function ArcChart({ history, arc, height = 200, weeksLabel = "26 weeks" }
         {hover !== null && (
           <g pointerEvents="none">
             <line x1={x(hover)} x2={x(hover)} y1={padT} y2={H - padB} stroke="var(--color-ink-3)" strokeWidth="1" />
-            <circle cx={x(hover)} cy={y(all[hover])} r="4" fill="var(--color-surface)" stroke="var(--color-ink)" strokeWidth="2" />
+            <circle cx={x(hover)} cy={y(all[hover])} r="4" fill="var(--color-surface)" stroke={hover > nowI ? "var(--color-signal)" : "var(--color-cobalt)"} strokeWidth="2" />
           </g>
         )}
       </svg>
@@ -125,7 +133,7 @@ export function Spark({ data, width = 72, height = 22, className }: { data: numb
   const up = data[data.length - 1] >= data[0];
   return (
     <svg width={width} height={height} className={className} aria-hidden>
-      <polyline points={pts} fill="none" stroke={up ? "var(--color-ink)" : "var(--color-ink-3)"} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <polyline points={pts} fill="none" stroke={up ? "var(--color-cobalt)" : "var(--color-ink-4)"} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }
@@ -141,7 +149,7 @@ export function Meter({ label, value, hint, emphasis }: { label: string; value: 
       <div className="h-[5px] overflow-hidden rounded-full bg-sunken">
         <motion.div
           className="h-full rounded-full"
-          style={{ background: emphasis ? "var(--color-signal)" : "var(--color-ink)" }}
+          style={{ background: emphasis ? "linear-gradient(90deg, var(--color-cobalt), var(--color-signal))" : "var(--color-cobalt)" }}
           initial={{ width: 0 }}
           animate={{ width: `${value}%` }}
           transition={{ duration: 0.9, ease: [0.2, 0.7, 0.2, 1] }}
@@ -159,7 +167,7 @@ export function RangeBar({ lo, hi, value, max }: { lo: number; hi: number; value
   return (
     <div className="relative h-7">
       <div className="absolute inset-x-0 top-3 h-[3px] rounded-full bg-sunken" />
-      <div className="absolute top-3 h-[3px] rounded-full bg-ink" style={{ left: pct(lo), width: `calc(${pct(hi)} - ${pct(lo)})` }} />
+      <div className="absolute top-3 h-[3px] rounded-full bg-cobalt" style={{ left: pct(lo), width: `calc(${pct(hi)} - ${pct(lo)})` }} />
       {value !== undefined && (
         <div className="absolute top-0 -translate-x-1/2" style={{ left: pct(value) }}>
           <div className={cn("mx-auto h-[18px] w-[3px] rounded-full", inside ? "bg-signal" : "bg-bad")} />
@@ -172,7 +180,7 @@ export function RangeBar({ lo, hi, value, max }: { lo: number; hi: number; value
 /** Stacked share bar for a few labelled parts (ink steps, labelled in a legend beside it). */
 export function ShareBar({ parts }: { parts: { label: string; value: number }[] }) {
   const total = parts.reduce((s, p) => s + p.value, 0);
-  const shades = ["var(--color-ink)", "#4a4944", "#85837c", "#b3b0a7", "#d4d1c8"];
+  const shades = ["#2a44d6", "#3b5bff", "#7086ff", "#a6b3ff", "#d3daff"];
   return (
     <div>
       <div className="flex h-2.5 gap-[2px] overflow-hidden rounded-full">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Building2, GraduationCap, User } from "lucide-react";
 import { useDemo } from "@/demo/store";
@@ -6,6 +6,8 @@ import { PERSONAS, type PersonaKey } from "@/demo/data";
 import { Logo } from "@/components/ui/logo";
 import { Button, Input } from "@/components/ui/primitives";
 import { ScoreArc } from "@/components/ui/charts";
+
+const ArcScene = lazy(() => import("@/components/three/ArcScene"));
 
 const CHOICES: { key: PersonaKey; icon: typeof User; blurb: string }[] = [
   { key: "brand", icon: Building2, blurb: "Find athletes, run campaigns, measure lift" },
@@ -17,6 +19,8 @@ export function Login() {
   const { dispatch } = useDemo();
   const nav = useNavigate();
   const [busy, setBusy] = useState<PersonaKey | null>(null);
+  const [wide, setWide] = useState(false);
+  useEffect(() => setWide(window.innerWidth >= 1024 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches), []);
   const enter = (k: PersonaKey) => {
     setBusy(k);
     setTimeout(() => {
@@ -46,7 +50,7 @@ export function Login() {
           <div className="space-y-2">
             {CHOICES.map((c) => (
               <button key={c.key} onClick={() => enter(c.key)} className="focus-ring group flex w-full items-center gap-3 rounded-[12px] border border-line bg-surface p-3 text-left shadow-[var(--shadow-card)] transition hover:border-line-strong">
-                <span className="grid h-9 w-9 place-items-center rounded-[9px] bg-sunken text-ink-2"><c.icon size={17} strokeWidth={1.8} /></span>
+                <span className={`grid h-9 w-9 place-items-center rounded-[9px] ${c.key === "brand" ? "bg-sky text-sky-ink" : c.key === "school" ? "bg-peach text-peach-ink" : "bg-mint text-mint-ink"}`}><c.icon size={17} strokeWidth={1.8} /></span>
                 <span className="flex-1">
                   <span className="block text-[13.5px] font-medium">{PERSONAS[c.key].org} <span className="font-normal text-ink-3">· {PERSONAS[c.key].orgKind}</span></span>
                   <span className="block text-[12.5px] text-ink-3">{c.blurb}</span>
@@ -58,13 +62,21 @@ export function Login() {
         </div>
         <p className="text-[12px] text-ink-4">Demo environment. All athletes, brands and schools are fictional.</p>
       </div>
-      <div className="relative hidden items-center justify-center overflow-hidden border-l border-line bg-surface lg:flex">
-        <div className="text-center">
-          <ScoreArc score={87} arc={12} size={340} />
-          <p className="mx-auto mt-10 max-w-sm text-[15px] leading-relaxed text-ink-3">
+      <div className="relative hidden overflow-hidden bg-night lg:block">
+        {wide && (
+          <Suspense fallback={null}>
+            <ArcScene idle active />
+          </Suspense>
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_100%,rgba(7,11,24,0.85),transparent_70%)]" />
+        <div className="absolute inset-x-0 bottom-0 p-12 text-white">
+          <div className="glass-dark mx-auto w-fit rounded-[24px] px-10 pb-7 pt-8">
+            <ScoreArc score={87} arc={12} size={260} dark />
+          </div>
+          <p className="mx-auto mt-8 max-w-sm text-center text-[15px] leading-relaxed text-white/60">
             Score is where an athlete is.
             <br />
-            <span className="text-ink">Arc is where they're going.</span>
+            <span className="text-white">Arc is where they're going.</span>
           </p>
         </div>
       </div>

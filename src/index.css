@@ -2,8 +2,9 @@
 
 /*
   ArcScore brand system.
-  Neutral bodies, one signal. Paper and ink do the work; Signal orange is
-  reserved for the arc, the ball, and the single number that matters.
+  Paper and ink do the work. Cobalt is the path (trajectory, data, focus);
+  Signal orange is the ball (the athlete, "now", the number that matters).
+  Night is the stage for hero moments. Tints add warmth, never noise.
 */
 @theme {
   --color-paper: #f6f5f1;
@@ -17,6 +18,23 @@
   --color-ink-4: #b3b0a7;
   --color-signal: #ff5a1f;
   --color-signal-soft: #fff0e9;
+  --color-cobalt: #3b5bff;
+  --color-cobalt-2: #2a44d6;
+  --color-cobalt-soft: #eef1ff;
+  --color-night: #070b18;
+  --color-night-2: #0e1528;
+
+  /* Tints for avatars and category chips (text color = matching deep tone). */
+  --color-peach: #ffeadf;
+  --color-peach-ink: #b4441a;
+  --color-sky: #e6ebff;
+  --color-sky-ink: #2a44d6;
+  --color-mint: #e2f3ea;
+  --color-mint-ink: #1f6e47;
+  --color-lilac: #efeaff;
+  --color-lilac-ink: #5b3fc4;
+  --color-sand: #f5eedd;
+  --color-sand-ink: #85621a;
 
   /* Status: reserved, always paired with an icon + label. */
   --color-good: #1f7a4d;
@@ -43,7 +61,20 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-::selection { background: var(--color-ink); color: var(--color-paper); }
+::selection { background: var(--color-cobalt); color: #fff; }
+
+.text-arc {
+  background: linear-gradient(95deg, #7d92ff 0%, #ff8a5c 55%, #ff5a1f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.glass-dark {
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
 
 .num { font-variant-numeric: tabular-nums; }
 .display { letter-spacing: -0.045em; line-height: 0.95; font-weight: 500; }
@@ -56,7 +87,7 @@ body {
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
 }
-.focus-ring:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+.focus-ring:focus-visible { outline: 2px solid var(--color-cobalt); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }

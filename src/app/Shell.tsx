@@ -50,7 +50,7 @@ function WorkspaceSwitcher() {
         aria-expanded={open}
         aria-haspopup="menu"
       >
-        <Avatar initials={persona.org.split(" ").map((w) => w[0]).slice(0, 2).join("")} tone="ink" size={30} className="rounded-[8px]" />
+        <span className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-[8px] bg-gradient-to-br from-cobalt to-[#8a6bff] text-[11px] font-medium text-white">{persona.org.split(" ").map((w) => w[0]).slice(0, 2).join("")}</span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13.5px] font-medium">{persona.org}</span>
           <span className="block text-[11.5px] text-ink-3">{persona.orgKind} workspace</span>
@@ -185,7 +185,7 @@ function Sidebar({ onSearch, onNavigate }: { onSearch: () => void; onNavigate?: 
       className={({ isActive }) =>
         cn(
           "focus-ring group flex items-center gap-2.5 rounded-[9px] px-2.5 py-[7px] text-[13.5px] transition-colors",
-          isActive ? "bg-surface font-medium text-ink shadow-[var(--shadow-card)] ring-1 ring-line" : "text-ink-2 hover:bg-sunken hover:text-ink"
+          isActive ? "bg-surface font-medium text-ink shadow-[var(--shadow-card)] ring-1 ring-line [&>svg]:text-cobalt" : "text-ink-2 hover:bg-sunken hover:text-ink"
         )
       }
     >
